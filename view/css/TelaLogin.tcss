@@ -1,8 +1,19 @@
 Login {
     align: center middle;
+    background: rgba(47, 177, 112, 1)
 }
 
 Input {
     margin-bottom: 1;
     width: 70%;
+}
+
+Select {
+    width: 20%;
+    margin: 0 0 2 60;
+}
+
+Button {
+    margin-left: 61;
+    width: 20%;
 }

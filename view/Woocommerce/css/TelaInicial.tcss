@@ -1,0 +1,12 @@
+TelaConsulta TextArea {
+    color: rgba(19, 243, 67, 1);
+}
+
+TelaConsulta #tx_info {
+    height: 20%;
+}
+
+Input {
+    width: 70%;
+}
+

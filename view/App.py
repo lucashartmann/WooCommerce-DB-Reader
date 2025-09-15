@@ -1,7 +1,8 @@
 from textual.app import App
-from view import TelaLogin, TelaInicial
+from view import TelaLogin
 from database import Shelve
 from api import API
+from view.Woocommerce import TelaInicial
 
 
 class App(App):
