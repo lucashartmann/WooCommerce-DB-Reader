@@ -33,6 +33,7 @@ def atualizar(id_produto):
     resposta = wcapi.put(f"products/{id_produto}", novo_preco).json()
     return resposta
 
+
 def get_lista_produtos():
-    lista_produtos = wcapi.get("products").json()
-    return lista_produtos
+    lista_de_dicionarios = wcapi.get("products").json()
+    return lista_de_dicionarios
