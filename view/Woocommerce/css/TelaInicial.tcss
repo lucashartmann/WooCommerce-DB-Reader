@@ -1,12 +1,41 @@
-TelaConsulta TextArea {
-    color: rgba(19, 243, 67, 1);
+TelaConsulta {
+    background: rgb(200, 200, 200);
 }
 
-TelaConsulta #tx_info {
+TelaConsulta TextArea {
+    color: rgba(19, 243, 67, 1);
     height: 20%;
+}
+
+TelaConsulta HorizontalGroup {
+    margin: 2;
+}
+
+TelaConsulta DataTable {
+    margin: 2;
+}
+
+TelaConsulta DataTable Row {
+    margin: 2;
+}
+
+TelaConsulta DataTable Column {
+    margin: 2;
 }
 
 Input {
     width: 70%;
 }
 
+
+TelaCadastro {
+    background: rgb(200, 200, 200);
+    align: center middle;
+    layout: grid;
+    grid-size: 4 3;
+    color: black;
+}
+
+TelaCadastro #stt_nome {
+    column-span: 3;
+}

@@ -8,7 +8,7 @@ wcapi = API(
 )
 
 
-def adicionar(dados):
+def adicionar(dados:dict):
     try:
         # data = {
         #     "name": "Camiseta",
@@ -22,23 +22,6 @@ def adicionar(dados):
     except Exception as e:
         print("ERRO!", e)
         return None
-    
-def adicionar2():
-    try:
-        data = {
-            "name": "Blusa",
-            "type": "simple",
-            "regular_price": "39.90",
-            "description": ""
-        }
-
-        wcapi.post("products", data).json()
-        return True
-    except Exception as e:
-        print("ERRO!", e)
-        return None
-
-
 
 
 def remover(id_produto):
@@ -57,7 +40,7 @@ def atualizar(id_produto, tipo_dado, novo_valor):
         # }
 
         novo_dado = {
-            f"{tipo_dado}": f"{novo_valor}"
+            tipo_dado: novo_valor
         }
 
         wcapi.put(f"products/{id_produto}", novo_dado).json()

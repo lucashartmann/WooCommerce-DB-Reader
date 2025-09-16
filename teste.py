@@ -1,6 +1,12 @@
-from model import Produto
+from api import API
+from database import Shelve
 
-um_produto = Produto.Produto()
+dados = Shelve.carregar("dados.db", "login")
+if dados:
+            API.wcapi.url = dados[0]
+            API.wcapi.consumer_key = dados[1]
+            API.wcapi.consumer_secret = dados[2]
 
-for chave, valor in um_produto.__dict__.items():
-    print(f"{chave}: {valor}", end="\n")
+print(API.atualizar("12", "name", "Camisa Preta"))
+
+print(API.get_lista_produtos())

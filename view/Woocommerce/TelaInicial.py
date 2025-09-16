@@ -14,3 +14,8 @@ class TelaInicial(Screen):
             with TabPane("Consultar"):
                 yield TelaConsulta.TelaConsulta()
         yield Footer()
+
+
+    def on_cadastro_realizado(self):
+        tela_consulta = self.query_one(TelaConsulta.TelaConsulta)
+        tela_consulta.atualizar()
