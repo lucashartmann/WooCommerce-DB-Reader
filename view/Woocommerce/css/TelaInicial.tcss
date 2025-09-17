@@ -5,6 +5,7 @@ TelaConsulta {
 TelaConsulta TextArea {
     color: rgba(19, 243, 67, 1);
     height: 20%;
+    margin: 2;
 }
 
 TelaConsulta HorizontalGroup {
@@ -23,6 +24,10 @@ TelaConsulta DataTable Column {
     margin: 2;
 }
 
+TelaConsulta Select {
+    width: 22%;
+}
+
 Input {
     width: 70%;
 }
@@ -38,4 +43,9 @@ TelaCadastro {
 
 TelaCadastro #stt_nome {
     column-span: 3;
+}
+
+TelaCadastro #input_descricao {
+    width: auto;
+    height: auto;
 }

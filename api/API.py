@@ -19,15 +19,16 @@ def adicionar(tabela, dados: dict):
 
         resposta = wcapi.post(tabela, dados).json()
         if "code" in resposta:
-            print("ERRO da API:", resposta)
+            print("ERRO da API ao adicionar!", resposta)
             return False
         else:
             if resposta:
                 return True
             else:
+                print("ERRO da API ao adicionar!", resposta)
                 return False
     except Exception as e:
-        print("ERRO!", e)
+        print("ERRO ao adicionar!", e)
         return False
 
 
@@ -37,9 +38,10 @@ def remover(tabela, id):
         if resposta and "deleted: true" in resposta:
             return True
         else:
+            print("ERRO da API ao remover!", resposta)
             return False
     except Exception as e:
-        print("ERRO!", e)
+        print("ERRO ao remover!", e)
         return False
 
 
@@ -57,9 +59,10 @@ def atualizar(tabela, id, tipo_dado, novo_valor):
         if resposta:
             return True
         else:
+            print("ERRO da API ao atualizar!", resposta)
             return False
     except Exception as e:
-        print("ERRO!", e)
+        print("ERRO ao atualizar!", e)
         return False
 
 
@@ -68,7 +71,7 @@ def get_lista_itens(tabela):
         lista_de_dicionarios = wcapi.get(tabela).json()
         return lista_de_dicionarios
     except Exception as e:
-        print("ERRO!", e)
+        print("ERRO ao listar!", e)
         return []
 
 
@@ -76,13 +79,14 @@ def get_item(tabela, id):
     try:
         lista_de_dicionarios = wcapi.get(f"{tabela}/{id}").json()
         if "code" in lista_de_dicionarios:
-            print("ERRO da API:", lista_de_dicionarios)
+            print("ERRO da API ao consultar!", lista_de_dicionarios)
             return []
         else:
             if lista_de_dicionarios:
                 return lista_de_dicionarios
             else:
+                print("ERRO da API ao consultar!", lista_de_dicionarios)
                 return []
     except Exception as e:
-        print("ERRO!", e)
+        print("ERRO ao consultar!", e)
         return []

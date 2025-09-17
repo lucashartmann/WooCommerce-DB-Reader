@@ -8,11 +8,11 @@ if dados:
             API.wcapi.consumer_secret = dados[2]
             
 data = {
-    "name" : "Lucas",
-    "email" : "lucas@email.com",
-    "username": "lucas123"
+    "status": "processing",
+    "customer_id": "271481149",
+    "currency" : "BRL" 
 }
 
-print(API.adicionar("customers", data))
+print(API.adicionar("orders", data))
 
-print(API.get_lista_itens("customers"))
+print(API.get_lista_itens("orders"))

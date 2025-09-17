@@ -12,10 +12,10 @@ class TelaConsulta(Container):
     ROWS = []
 
     filtros_tabela = {
-        "products": ["id", "name", "price", "status"],
+        "products": ["id", "name", "price", "description"],
         "customers": ["id", "email", "first_name", "last_name"],
-        "orders": ["id", "status", "total", "customer_id"],
-        "coupons": ["id", "code", "discount_type", "amount"]
+        "orders": ["id", "customer_id"],
+        "coupons": ["id", "code", "amount", "date_expires"]
     }
 
     def compose(self):
@@ -44,34 +44,7 @@ class TelaConsulta(Container):
         self.atualizar()
 
     def on_mount(self):
-        self.lista_produtos = API.get_lista_itens("products")
-
-        quant = len(self.lista_produtos)
-
-        self.query_one(
-            TextArea).text = f"Exemplo de busca: 'name: camisa - blusa, id: 1' \n\nQuantidade de lista_produtos: {quant}"
-
-        self.ROWS = []
-
-        lista_chaves = []
-        for produto in self.lista_produtos:
-            for chave, dados in produto.items():
-                if chave and dados and chave not in lista_chaves:
-                    lista_chaves.append(chave)
-        self.ROWS.append(lista_chaves)
-
-        for produto in self.lista_produtos:
-            lista = []
-            for valor in produto.values():
-                if valor not in lista:
-                    lista.append(valor)
-            self.ROWS.append(lista)
-
-        table = self.query_one(DataTable)
-        for col in self.ROWS[0]:
-            table.add_column(col, key=col)
-        for row in self.ROWS[1:]:
-            table.add_row(*row, height=3)
+        self.atualizar()
 
     def atualizar(self):
         if len(self.lista_produtos_filtrados) > 0:
@@ -80,32 +53,37 @@ class TelaConsulta(Container):
             self.lista_produtos = API.get_lista_itens(self.tabela)
             lista = self.lista_produtos
 
+        quant = len(self.lista_produtos)
+
+        self.query_one(
+            TextArea).text = f"Exemplo de busca: 'name: camisa - blusa, id: 1' \n\nQuantidade de itens: {quant}"
+
         self.ROWS = []
 
         lista_chaves = []
         for produto in lista:
             for chave, dados in produto.items():
-                if chave and dados and chave not in lista_chaves and chave in self.filtros_tabela[self.tabela]:
+                if dados and chave not in lista_chaves and chave in self.filtros_tabela[self.tabela]:
                     lista_chaves.append(chave)
         self.ROWS.append(lista_chaves)
 
         for produto in lista:
             lista = []
             for chave, valor in produto.items():
-                if chave and valor and valor not in lista and chave in self.filtros_tabela[self.tabela]:
+                if valor and valor not in lista and chave in self.filtros_tabela[self.tabela]:
                     lista.append(valor)
             self.ROWS.append(lista)
 
         table = self.query_one(DataTable)
         table.clear(columns=True)
 
-        for col in self.ROWS[0]:
-            table.add_column(col, key=col)
+        table.add_columns(*self.ROWS[0])
+
         for row in self.ROWS[1:]:
             table.add_row(*row, height=3)
 
     def filtro(self, palavras, index, filtro_recebido):
-        lista_filtros = ["id", "price"]
+        lista_filtros = ["id", "customer_id"]
         nova_lista = []
 
         if index + 1 < len(palavras):
@@ -173,33 +151,14 @@ class TelaConsulta(Container):
     def on_input_changed(self, evento: Input.Changed):
         texto = evento.value
         palavras = texto.split()
+        lista = ["name:", "id:", "price:", "description:", "email:", "first_name", "last_name", "code", "amount", "date_expires"]
 
         if len(palavras) > 0:
             self.lista_produtos_filtrados = []
-
             for palavra in palavras:
-                match palavra:
-                    case  "NAME:" | "name:":
-                        try:
-                            index = palavras.index("NAME:")
-                        except:
-                            index = palavras.index("name:")
-                        self.filtro(palavras, index, "name")
-
-                    case "ID:" | "id:":
-                        try:
-                            index = palavras.index("ID:")
-                        except:
-                            index = palavras.index("id:")
-                        self.filtro(palavras, index, "id")
-
-                    case "PRICE" | "price:":
-                        try:
-                            index = palavras.index("PRICE:")
-                        except:
-                            index = palavras.index("price:")
-                        self.filtro(palavras, index, "price")
-
+                if palavra.lower() in lista:
+                    index = palavras.index(palavra)
+                    self.filtro(palavras, index, palavra[:-1].lower())
                 self.atualizar()
         else:
             self.atualizar()

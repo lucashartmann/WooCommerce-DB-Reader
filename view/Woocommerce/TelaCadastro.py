@@ -1,6 +1,5 @@
-from textual.containers import Container, HorizontalGroup
+from textual.containers import Container
 from textual.widgets import Button, Static, Input, Select
-from textual import on
 from textual.message import Message
 from controller import Controller
 
@@ -19,41 +18,64 @@ class TelaCadastro(Container):
     def compose(self):
         # yield Static("ID", id="sttc_id")
         # yield Input(placeholder="id aqui")
-        yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
-        yield Static("Preço")
-        yield Input(placeholder="preço aqui")
         yield Static("Nome")
         yield Input(placeholder="nome aqui", id="stt_nome")
-
+        yield Static("Preço")
+        yield Input(placeholder="preço aqui")
+        yield Static("Descrição")
+        yield Input(placeholder="Descrição aqui", id="input_descricao")
+        yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
         yield Select([("Adicionar", "Adicionar"), ("Editar", "Editar"), ("Remover", "Remover")], allow_blank=False, id="select_operacoes")
         yield Button("Executar")
 
     def on_select_changed(self, evento: Select.Changed):
+        self.query(Static)[1].styles.display = "block"
+        self.query(Input)[1].styles.display = "block"
+        self.query(Static)[2].styles.display = "block"
+        self.query(Input)[2].styles.display = "block"
+
         match evento.select.value:
 
             case "Products":
                 self.tabela = "products"
-                self.query(Static)[3].update("Preços")
-                self.query(Input)[0].placeholder = "preço aqui"
+                self.query(Static)[1].update("Preço")
+                self.query(Input)[1].placeholder = "Preço aqui"
+                self.query(Static)[0].update("Nome")
+                self.query(Input)[0].placeholder = "Nome aqui"
+                self.query(Static)[2].update("Descrição")
+                self.query(Input)[2].placeholder = "Descrição aqui"
             case "Customers":
                 self.tabela = "customers"
-                self.query(Static)[3].update("email")
-                self.query(Input)[0].placeholder = "email aqui"
+                self.query(Static)[1].update("Email")
+                self.query(Input)[1].placeholder = "Email aqui"
+                self.query(Static)[0].update("Nome")
+                self.query(Input)[0].placeholder = "Nome aqui"
+                self.query(Static)[2].styles.display = "none"
+                self.query(Input)[2].styles.display = "none"
             case "Coupons":
                 self.tabela = "coupons"
-                # self.query(Static)[3].update("email")
-                # self.query(Input)[0].placeholder = "email aqui"
+                self.query(Static)[0].update("Código")
+                self.query(Input)[0].placeholder = "Código aqui"
+                self.query(Static)[1].update("Quantidade de desconto:")
+                self.query(Input)[
+                    1].placeholder = "Quantidade de desconto: aqui"
+                self.query(Static)[2].update("Data de expiração")
+                self.query(Input)[2].placeholder = "Data de expiração aqui"
             case "Orders":
                 self.tabela = "orders"
-                self.query(Static)[3].update("Id do cliente")
-                self.query(Input)[0].placeholder = "id do cliente aqui"
+                self.query(Static)[0].update("Id do cliente")
+                self.query(Input)[0].placeholder = "Id do cliente aqui"
+                self.query(Static)[1].styles.display = "none"
+                self.query(Input)[1].styles.display = "none"
+                self.query(Static)[2].styles.display = "none"
+                self.query(Input)[2].styles.display = "none"
 
             case "Editar":
                 if self.montou == False:
                     self.mount(Static("ID de pesquisa",
-                                      id="stt_id_pesquisa"), before=1)
+                                      id="stt_id_pesquisa"), before=0)
                     self.mount(Input(placeholder="id do produto de pesquisa",
-                                     id="inpt_id_pesquisa"), before=2)
+                                     id="inpt_id_pesquisa"), before=1)
                     self.montou = True
                 self.valor_select = "Editar"
 
@@ -80,7 +102,8 @@ class TelaCadastro(Container):
                 dados = []
                 for input in self.query(Input)[1:]:
                     dados.append(input.value)
-                atualizacao = Controller.atualizar_item(self.tabela, id_produto, dados)
+                atualizacao = Controller.atualizar_item(
+                    self.tabela, id_produto, dados)
                 self.notify(atualizacao)
                 self.post_message(CadastroRealizado())
 
