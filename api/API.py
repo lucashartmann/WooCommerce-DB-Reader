@@ -8,7 +8,7 @@ wcapi = API(
 )
 
 
-def adicionar(dados:dict):
+def adicionar(tabela, dados: dict):
     try:
         # data = {
         #     "name": "Camiseta",
@@ -17,23 +17,33 @@ def adicionar(dados:dict):
         #     "description": ""
         # }
 
-        wcapi.post("products", dados).json()
-        return True
+        resposta = wcapi.post(tabela, dados).json()
+        if "code" in resposta:
+            print("ERRO da API:", resposta)
+            return False
+        else:
+            if resposta:
+                return True
+            else:
+                return False
     except Exception as e:
         print("ERRO!", e)
-        return None
+        return False
 
 
-def remover(id_produto):
+def remover(tabela, id):
     try:
-        wcapi.delete(f"products/{id_produto}").json()
-        return True
+        resposta = wcapi.delete(f"{tabela}/{id}").json()
+        if resposta and "deleted: true" in resposta:
+            return True
+        else:
+            return False
     except Exception as e:
         print("ERRO!", e)
-        return None
+        return False
 
 
-def atualizar(id_produto, tipo_dado, novo_valor):
+def atualizar(tabela, id, tipo_dado, novo_valor):
     try:
         # novo_preco = {
         #     "regular_price": "34.90"
@@ -43,30 +53,36 @@ def atualizar(id_produto, tipo_dado, novo_valor):
             tipo_dado: novo_valor
         }
 
-        wcapi.put(f"products/{id_produto}", novo_dado).json()
-        return True
+        resposta = wcapi.put(f"{tabela}/{id}", novo_dado).json()
+        if resposta:
+            return True
+        else:
+            return False
     except Exception as e:
         print("ERRO!", e)
-        return None
+        return False
 
 
-def get_lista_produtos():
+def get_lista_itens(tabela):
     try:
-        lista_de_dicionarios = wcapi.get("products").json()
-        if not lista_de_dicionarios:
-            return []
+        lista_de_dicionarios = wcapi.get(tabela).json()
         return lista_de_dicionarios
     except Exception as e:
         print("ERRO!", e)
         return []
 
 
-def get_produto(id_produto):
+def get_item(tabela, id):
     try:
-        lista_de_dicionarios = wcapi.get(f"products/{id_produto}").json()
-        if not lista_de_dicionarios:
+        lista_de_dicionarios = wcapi.get(f"{tabela}/{id}").json()
+        if "code" in lista_de_dicionarios:
+            print("ERRO da API:", lista_de_dicionarios)
             return []
-        return lista_de_dicionarios
+        else:
+            if lista_de_dicionarios:
+                return lista_de_dicionarios
+            else:
+                return []
     except Exception as e:
         print("ERRO!", e)
         return []

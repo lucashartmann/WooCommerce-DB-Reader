@@ -6,7 +6,13 @@ if dados:
             API.wcapi.url = dados[0]
             API.wcapi.consumer_key = dados[1]
             API.wcapi.consumer_secret = dados[2]
+            
+data = {
+    "name" : "Lucas",
+    "email" : "lucas@email.com",
+    "username": "lucas123"
+}
 
-print(API.atualizar("12", "name", "Camisa Preta"))
+print(API.adicionar("customers", data))
 
-print(API.get_lista_produtos())
+print(API.get_lista_itens("customers"))

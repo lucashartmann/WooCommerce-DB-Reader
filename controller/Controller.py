@@ -1,42 +1,46 @@
 from api import API
 
 
-def adicionar_produto(dados):
-    preco = dados[0]
-    nome = dados[1]
-
-    # data = {
-    #         "name": "Camiseta",
-    #         "type": "simple",
-    #         "regular_price": "29.90",
-    #         "description": ""
-    #     }
-
-    data = {
+def adicionar_item(tabela, dados):
+    
+    if tabela == "products":
+        preco = dados[0]
+        nome = dados[1]
+        
+        data = {
             "name": f"{nome}",
             "regular_price": f"{preco}",
         }
+        
+    elif tabela == "customers":
+        email = dados[0]
+        nome = dados[1]
 
-    adicao = API.adicionar(data)
+        data = {
+            "email": f"{email}",
+            "name": f"{nome}",
+        }
+
+    adicao = API.adicionar(tabela, data)
 
     if adicao:
-        return "Produto adicionado com sucesso!"
-    return f"ERRO! Não foi possivel adicionar produto"
+        return "Cadastro realizado com sucesso!"
+    return f"ERRO! Não foi possivel realizar cadastro"
 
 
-def remover_produto(id_produto):
-    if id_produto == "":
+def remover_item(tabela, id_item):
+    if id_item == "":
         return "ID está vazio"
 
-    remocao = API.remover(id_produto)
+    remocao = API.remover(tabela, id_item)
 
     if remocao:
-        return "Produto removido com sucesso"
-    return f"ERRO! Não foi possivel remover produto '{id_produto}'"
+        return "Remoção realizada com sucesso"
+    return f"ERRO! Não foi possivel remover '{id_item}'"
 
 
-def atualizar_produto(id_produto, dados):
-    if id_produto == "":
+def atualizar_item(tabela, id_item, dados):
+    if id_item == "":
         return "ID está vazio"
 
     novo_preco = dados[0]
@@ -45,28 +49,28 @@ def atualizar_produto(id_produto, dados):
     resultado_atualizacao = ""
 
     if novo_preco:
-        atualizacao = API.atualizar(id_produto, "price", novo_preco)
+        atualizacao = API.atualizar(tabela, id_item, "price", novo_preco)
         if atualizacao:
             resultado_atualizacao += "Preço atualizado com sucesso com sucesso"
         else:
-            resultado_atualizacao += f"ERRO! Não foi possivel atualizar preço do produto '{id_produto}'"
+            resultado_atualizacao += f"ERRO! Não foi possivel atualizar preço de '{id_item}'"
 
     if novo_nome:
-        atualizacao = API.atualizar(id_produto, "name", novo_nome)
+        atualizacao = API.atualizar(tabela, id_item, "name", novo_nome)
         if atualizacao:
             resultado_atualizacao += "Nome atualizado com sucesso com sucesso"
         else:
-            resultado_atualizacao += f"ERRO! Não foi possivel atualizar o nome do produto '{id_produto}'"
+            resultado_atualizacao += f"ERRO! Não foi possivel atualizar o nome de '{id_item}'"
 
     return resultado_atualizacao
 
 
-def consultar_produto_por_id(id_produto):
-    if id_produto == "":
+def consultar_item_por_id(tabela, id_item):
+    if id_item == "":
         return "ID está vazio"
 
-    consulta = API.get_produto(id_produto)
+    consulta = API.get_produto(tabela, id_item)
 
     if consulta:
         return consulta
-    return f"ERRO! Não foi possivel consultar produto '{id_produto}'"
+    return f"ERRO! Não foi possivel consultar '{id_item}'"

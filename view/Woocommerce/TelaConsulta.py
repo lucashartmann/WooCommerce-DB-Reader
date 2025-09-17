@@ -1,18 +1,26 @@
 from textual.containers import Container, HorizontalGroup
-from textual.widgets import Button, TextArea, Input, DataTable
+from textual.widgets import Button, TextArea, Input, DataTable, Select
 from api import API
 from controller import Controller
 
 
 class TelaConsulta(Container):
 
-    lista_produtos = API.get_lista_produtos()
+    lista_produtos = []
     lista_produtos_filtrados = []
-
+    tabela = "products"
     ROWS = []
+
+    filtros_tabela = {
+        "products": ["id", "name", "price", "status"],
+        "customers": ["id", "email", "first_name", "last_name"],
+        "orders": ["id", "status", "total", "customer_id"],
+        "coupons": ["id", "code", "discount_type", "amount"]
+    }
 
     def compose(self):
         with HorizontalGroup():
+            yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
             yield Input(placeholder="pesquise aqui")
             yield Button("Remover")
         yield TextArea(read_only=True)
@@ -23,8 +31,20 @@ class TelaConsulta(Container):
         remocao = Controller.remover_produto(id_produto)
         self.notify(remocao)
 
+    def on_select_changed(self, evento: Select.Changed):
+        match evento.select.value:
+            case "Products":
+                self.tabela = "products"
+            case "Customers":
+                self.tabela = "customers"
+            case "Coupons":
+                self.tabela = "coupons"
+            case "Orders":
+                self.tabela = "orders"
+        self.atualizar()
+
     def on_mount(self):
-        self.lista_produtos = API.get_lista_produtos()
+        self.lista_produtos = API.get_lista_itens("products")
 
         quant = len(self.lista_produtos)
 
@@ -57,7 +77,7 @@ class TelaConsulta(Container):
         if len(self.lista_produtos_filtrados) > 0:
             lista = self.lista_produtos_filtrados
         else:
-            self.lista_produtos = API.get_lista_produtos()
+            self.lista_produtos = API.get_lista_itens(self.tabela)
             lista = self.lista_produtos
 
         self.ROWS = []
@@ -65,14 +85,14 @@ class TelaConsulta(Container):
         lista_chaves = []
         for produto in lista:
             for chave, dados in produto.items():
-                if chave and dados and chave not in lista_chaves:
+                if chave and dados and chave not in lista_chaves and chave in self.filtros_tabela[self.tabela]:
                     lista_chaves.append(chave)
         self.ROWS.append(lista_chaves)
 
         for produto in lista:
             lista = []
-            for valor in produto.values():
-                if valor not in lista:
+            for chave, valor in produto.items():
+                if chave and valor and valor not in lista and chave in self.filtros_tabela[self.tabela]:
                     lista.append(valor)
             self.ROWS.append(lista)
 
