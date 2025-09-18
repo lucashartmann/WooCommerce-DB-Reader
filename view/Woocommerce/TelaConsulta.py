@@ -1,10 +1,13 @@
-from textual.containers import Container, HorizontalGroup
-from textual.widgets import Button, TextArea, Input, DataTable, Select
+from textual.containers import HorizontalGroup
+from textual.widgets import Button, TextArea, Input, DataTable, Select, Tabs, Tab
 from api import API
 from controller import Controller
+from textual.screen import Screen
 
 
-class TelaConsulta(Container):
+class TelaConsulta(Screen):
+
+    CSS_PATH = "css/TelaConsulta.tcss"
 
     lista_produtos = []
     lista_produtos_filtrados = []
@@ -20,6 +23,7 @@ class TelaConsulta(Container):
 
     def compose(self):
         with HorizontalGroup():
+            yield Tabs(Tab("TelaCadastrar"), Tab("TelaConsultar", id="tab_Consultar"))
             yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
             yield Input(placeholder="pesquise aqui")
             yield Button("Remover")
@@ -28,8 +32,15 @@ class TelaConsulta(Container):
 
     def on_button_pressed(self):
         id_produto = self.query_one(Input).value
-        remocao = Controller.remover_produto(id_produto)
+        remocao = Controller.remover_item(self.tabela, id_produto)
         self.notify(remocao)
+        self.atualizar()
+        for input in self.query(Input):
+            input.value = ""
+
+    def on_tabs_tab_activated(self, event: Tabs.TabActivated):
+        if event.tab.label == "TelaCadastrar":
+            self.app.switch_screen("tela_cadastro")
 
     def on_select_changed(self, evento: Select.Changed):
         match evento.select.value:
@@ -44,6 +55,7 @@ class TelaConsulta(Container):
         self.atualizar()
 
     def on_mount(self):
+        Tabs.focus(self.query_one("#tab_Consultar", Tab))
         self.atualizar()
 
     def atualizar(self):
@@ -151,7 +163,8 @@ class TelaConsulta(Container):
     def on_input_changed(self, evento: Input.Changed):
         texto = evento.value
         palavras = texto.split()
-        lista = ["name:", "id:", "price:", "description:", "email:", "first_name", "last_name", "code", "amount", "date_expires"]
+        lista = ["name:", "id:", "price:", "description:", "email:",
+                 "first_name", "last_name", "code", "amount", "date_expires"]
 
         if len(palavras) > 0:
             self.lista_produtos_filtrados = []
@@ -159,6 +172,6 @@ class TelaConsulta(Container):
                 if palavra.lower() in lista:
                     index = palavras.index(palavra)
                     self.filtro(palavras, index, palavra[:-1].lower())
-                self.atualizar()
+                    self.atualizar()
         else:
             self.atualizar()
