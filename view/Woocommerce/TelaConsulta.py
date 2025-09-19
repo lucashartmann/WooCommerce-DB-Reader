@@ -22,14 +22,22 @@ class TelaConsulta(Screen):
     }
 
     def compose(self):
+        yield Tabs(Tab("TelaCadastrar", id="tab_cadastrar"), Tab("TelaConsultar", id="tab_consultar"))
         with HorizontalGroup():
-            yield Tabs(Tab("TelaCadastrar"), Tab("TelaConsultar", id="tab_Consultar"))
             yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
             yield Input(placeholder="pesquise aqui")
             yield Button("Remover")
         yield TextArea(read_only=True)
         yield DataTable()
 
+    def on_tabs_tab_activated(self, event: Tabs.TabActivated):
+        if event.tabs.active == self.query_one("#tab_cadastrar", Tab).id :
+            self.app.switch_screen("tela_cadastro")
+
+    def on_screen_resume(self):
+        self.query_one(Tabs).active = self.query_one("#tab_consultar", Tab).id 
+        self.atualizar()
+    
     def on_button_pressed(self):
         id_produto = self.query_one(Input).value
         remocao = Controller.remover_item(self.tabela, id_produto)
@@ -37,10 +45,6 @@ class TelaConsulta(Screen):
         self.atualizar()
         for input in self.query(Input):
             input.value = ""
-
-    def on_tabs_tab_activated(self, event: Tabs.TabActivated):
-        if event.tab.label == "TelaCadastrar":
-            self.app.switch_screen("tela_cadastro")
 
     def on_select_changed(self, evento: Select.Changed):
         match evento.select.value:
@@ -54,15 +58,11 @@ class TelaConsulta(Screen):
                 self.tabela = "orders"
         self.atualizar()
 
-    def on_mount(self):
-        Tabs.focus(self.query_one("#tab_Consultar", Tab))
-        self.atualizar()
-
     def atualizar(self):
         if len(self.lista_produtos_filtrados) > 0:
             lista = self.lista_produtos_filtrados
         else:
-            self.lista_produtos = API.get_lista_itens(self.tabela)
+            self.lista_produtos, _ = API.get_lista_itens(self.tabela)
             lista = self.lista_produtos
 
         quant = len(self.lista_produtos)

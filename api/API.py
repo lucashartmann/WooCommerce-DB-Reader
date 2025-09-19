@@ -20,29 +20,26 @@ def adicionar(tabela, dados: dict):
         resposta = wcapi.post(tabela, dados).json()
         if "code" in resposta:
             print("ERRO da API ao adicionar!", resposta)
-            return False
+            return False, resposta
         else:
             if resposta:
-                return True
+                return True, ""
             else:
                 print("ERRO da API ao adicionar!", resposta)
-                return False
+                return False, ""
     except Exception as e:
         print("ERRO ao adicionar!", e)
-        return False
+        return False, e
 
 
 def remover(tabela, id):
     try:
         resposta = wcapi.delete(f"{tabela}/{id}").json()
-        if resposta and "deleted: true" in resposta:
-            return True
-        else:
-            print("ERRO da API ao remover!", resposta)
-            return False
+        if resposta:
+            return True, ""
     except Exception as e:
         print("ERRO ao remover!", e)
-        return False
+        return False, e
 
 
 def atualizar(tabela, id, tipo_dado, novo_valor):
@@ -57,22 +54,21 @@ def atualizar(tabela, id, tipo_dado, novo_valor):
 
         resposta = wcapi.put(f"{tabela}/{id}", novo_dado).json()
         if resposta:
-            return True
+            return True, ""
         else:
             print("ERRO da API ao atualizar!", resposta)
-            return False
+            return False, ""
     except Exception as e:
         print("ERRO ao atualizar!", e)
-        return False
+        return False, e
 
 
 def get_lista_itens(tabela):
     try:
         lista_de_dicionarios = wcapi.get(tabela).json()
-        return lista_de_dicionarios
+        return lista_de_dicionarios, ""
     except Exception as e:
-        print("ERRO ao listar!", e)
-        return []
+        return [], e
 
 
 def get_item(tabela, id):
@@ -80,13 +76,13 @@ def get_item(tabela, id):
         lista_de_dicionarios = wcapi.get(f"{tabela}/{id}").json()
         if "code" in lista_de_dicionarios:
             print("ERRO da API ao consultar!", lista_de_dicionarios)
-            return []
+            return [], ""
         else:
             if lista_de_dicionarios:
-                return lista_de_dicionarios
+                return lista_de_dicionarios, ""
             else:
                 print("ERRO da API ao consultar!", lista_de_dicionarios)
-                return []
+                return [], ""
     except Exception as e:
         print("ERRO ao consultar!", e)
-        return []
+        return [], e

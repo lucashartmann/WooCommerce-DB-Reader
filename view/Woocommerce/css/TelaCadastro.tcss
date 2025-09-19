@@ -2,12 +2,13 @@ Input {
     width: 70%;
 }
 
+TelaCadastro Grid {
+    grid-size: 4 3;
+    align: center middle;
+}
 
 TelaCadastro {
     background: rgb(200, 200, 200);
-    align: center middle;
-    layout: grid;
-    grid-size: 4 3;
     color: black;
 }
 
@@ -18,4 +19,8 @@ TelaCadastro #stt_nome {
 TelaCadastro #input_descricao {
     width: auto;
     height: auto;
+}
+
+Tab {
+    color: black;    
 }
