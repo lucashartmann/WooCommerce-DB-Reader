@@ -14,6 +14,12 @@ def adicionar_item(tabela, dados: dict):
         else:
             dados["first_name"] = dados["name"]
             del dados["name"]
+    
+    if tabela == "orders":
+        consulta, erro = API.get_item("customers", dados["customer_id"])
+
+        if erro or not consulta:
+            return "Controller.adicionar_item: ERRO! Cliente não cadastrado"
 
     adicao, erro = API.adicionar(tabela, dados)
 
@@ -108,7 +114,7 @@ def listar_itens(tabela):
 
     if lista_dicionarios:
         for produto in lista_dicionarios:
-            resultado += f"\nPRODUTO"
+            resultado += f"\nPRODUTO\n"
             for chave, valor in produto.items():
                 if valor and chave in filtros_tabela[tabela]:
                     resultado += f"{chave} = {valor}\n"

@@ -7,6 +7,28 @@ wcapi = API(
     version="wc/v3"
 )
 
+# def adicionar(tabela, item):
+#     try:
+#         mapa_filtrado = {}
+
+#         for chave, valor in item.__dict__.items():
+#             if valor:
+#                 mapa_filtrado[chave] = valor
+
+#         resposta = wcapi.post(tabela, mapa_filtrado).json()
+#         if "code" in resposta:
+#             print("ERRO da API ao adicionar!", resposta)
+#             return False, resposta
+#         else:
+#             if resposta:
+#                 return True, ""
+#             else:
+#                 print("ERRO da API ao adicionar!", resposta)
+#                 return False, ""
+#     except Exception as e:
+#         print("ERRO ao adicionar!", e)
+#         return False, e
+
 
 def adicionar(tabela, dados: dict):
     try:

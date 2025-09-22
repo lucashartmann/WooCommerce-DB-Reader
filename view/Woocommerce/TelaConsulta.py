@@ -1,5 +1,5 @@
 from textual.containers import HorizontalGroup
-from textual.widgets import Button, TextArea, Input, DataTable, Select, Tabs, Tab
+from textual.widgets import Button, TextArea, Input, DataTable, Select, Tabs, Tab, Header, Footer
 from api import API
 from controller import Controller
 from textual.screen import Screen
@@ -15,13 +15,14 @@ class TelaConsulta(Screen):
     ROWS = []
 
     filtros_tabela = {
-        "products": ["id", "name", "price", "description"],
-        "customers": ["id", "email", "first_name", "last_name"],
-        "orders": ["id", "customer_id"],
-        "coupons": ["id", "code", "amount", "date_expires"]
+        "products": ["id", "name", "price", "description", "status", "date_created_gmt", "date_modified_gmt"],
+        "customers": ["id", "email", "first_name", "last_name", "username", "shipping", "date_created_gmt", "date_modified_gmt"],
+        "orders": ["id", "customer_id", "total", "discount_total", "shipping_total", "payment_method", "date_created_gmt", "date_modified_gmt", "shipping", "date_completed_gmt"],
+        "coupons": ["id", "code", "amount", "product_ids", "date_created_gmt", "date_modified_gmt", "date_expires", "free_shipping", "product_categories"]
     }
 
     def compose(self):
+        yield Header()
         yield Tabs(Tab("TelaCadastrar", id="tab_cadastrar"), Tab("TelaConsultar", id="tab_consultar"))
         with HorizontalGroup():
             yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
@@ -29,15 +30,16 @@ class TelaConsulta(Screen):
             yield Button("Remover")
         yield TextArea(read_only=True)
         yield DataTable()
+        yield Footer()
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated):
-        if event.tabs.active == self.query_one("#tab_cadastrar", Tab).id :
+        if event.tabs.active == self.query_one("#tab_cadastrar", Tab).id:
             self.app.switch_screen("tela_cadastro")
 
     def on_screen_resume(self):
-        self.query_one(Tabs).active = self.query_one("#tab_consultar", Tab).id 
+        self.query_one(Tabs).active = self.query_one("#tab_consultar", Tab).id
         self.atualizar()
-    
+
     def on_button_pressed(self):
         id_produto = self.query_one(Input).value
         remocao = Controller.remover_item(self.tabela, id_produto)
@@ -75,14 +77,28 @@ class TelaConsulta(Screen):
         lista_chaves = []
         for produto in lista:
             for chave, dados in produto.items():
-                if dados and chave not in lista_chaves and chave in self.filtros_tabela[self.tabela]:
+                if dados and (chave not in lista_chaves) and (chave in self.filtros_tabela[self.tabela]):
+                    if isinstance(dados, dict):
+                        dados = "".join(dados.values())
+                        if not dados:
+                            break
                     lista_chaves.append(chave)
         self.ROWS.append(lista_chaves)
 
         for produto in lista:
             lista = []
             for chave, valor in produto.items():
-                if valor and valor not in lista and chave in self.filtros_tabela[self.tabela]:
+                if chave in self.ROWS[0]:
+                    if "description" in chave:
+                        if valor:
+                            valor = " ".join(
+                                " ".join(valor.split("<p>")).split("</p>"))
+                    elif "price" in chave:
+                        if valor:
+                            valor = f"${valor}"
+                    elif "date" in chave:
+                        if valor:
+                            valor = " ".join(valor.split("T"))
                     lista.append(valor)
             self.ROWS.append(lista)
 

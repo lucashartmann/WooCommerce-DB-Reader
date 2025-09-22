@@ -76,7 +76,7 @@ class TelaCadastro(Screen):
                     self.query_one(Grid).query(Input)[
                         1].placeholder = "Quantidade de desconto: aqui"
                     self.query_one(Grid).query(Static)[
-                        2].update("Data de expiração")
+                        2].update("Date_Expires")
                     self.query_one(Grid).query(Input)[
                         2].placeholder = "Data de expiração aqui"
                 case "Orders":
