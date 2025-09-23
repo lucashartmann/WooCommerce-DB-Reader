@@ -29,7 +29,8 @@ jobs:
           pyinstaller --onedir `
               --add-data "view/css;view/css" `
               --add-data "view/Woocommerce/css;view/Woocommerce/css" `
-              WoocomerceDB.py
+              --name WoocomerceDB 
+              Main.py
 
       - name: Fazer upload do artefato
         uses: actions/upload-artifact@v4
