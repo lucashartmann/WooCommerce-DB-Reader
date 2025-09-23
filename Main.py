@@ -14,7 +14,8 @@ def login():
     else:
         print("Faça Login antes! [login url consumer_key cosumer_secret]")
         return
-    
+
+
 def help():
     comandos = '''
 TABELAS: products, customers, orders, coupons
@@ -82,7 +83,7 @@ def menu(comando):
         case ["consultar", tabela, id]:
             login()
             print(Controller.consultar_item(tabela.lower(), id))
-        case ["ajuda"|"--help"|"help"|"--ajuda"]:
+        case ["ajuda" | "--help" | "help" | "--ajuda"]:
             print(help())
         case _:
             print("ERRO! Comando inválido!")
