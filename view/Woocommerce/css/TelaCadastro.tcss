@@ -3,7 +3,7 @@ Input {
 }
 
 TelaCadastro Grid {
-    grid-size: 4 3;
+    grid-size: 2;
     align: center middle;
 }
 
@@ -23,4 +23,9 @@ TelaCadastro #input_descricao {
 
 Tab {
     color: black;    
+}
+
+SelectionList {
+    width: 25%;
+    height: 100%;
 }

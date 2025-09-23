@@ -23,7 +23,7 @@ class Login(Screen):
         login = Controller.salvar_login(dados)
         self.notify(login)
         if "ERRO!" not in login:
-            self.app.switch_screen("tela_inicial")
+            self.app.switch_screen("tela_cadastro")
 
     @on(Select.Changed)
     def select_changed(self, evento: Select.Changed):

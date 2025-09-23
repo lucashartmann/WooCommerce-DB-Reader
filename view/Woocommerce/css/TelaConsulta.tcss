@@ -36,3 +36,9 @@ Input {
 Tab {
     color: black;    
 }
+
+SelectionList {
+    width: 25%;
+    height: 100%;
+}
+

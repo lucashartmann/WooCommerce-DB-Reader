@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class Coupons:
+class Cupom:
     def __init__(self, code):
         self.id = 0  # Unique identifier for the object.read-only
         self.code = code  # Coupon code.mandatory

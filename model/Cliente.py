@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class Customers:
+class Cliente:
     def __init__(self, email):
         self.id = 0  # Unique identifier for the resource.read-only
         # The date the customer was created, in the site's timezone.read-only

@@ -1,8 +1,10 @@
 from textual.containers import HorizontalGroup
-from textual.widgets import Button, TextArea, Input, DataTable, Select, Tabs, Tab, Header, Footer
+from textual.widgets import Button, Static, TextArea, Input, DataTable, Select, Tabs, Tab, Header, Footer, SelectionList
 from api import API
 from controller import Controller
 from textual.screen import Screen
+from model import Init
+from textual import on
 
 
 class TelaConsulta(Screen):
@@ -13,13 +15,8 @@ class TelaConsulta(Screen):
     lista_produtos_filtrados = []
     tabela = "products"
     ROWS = []
-
-    filtros_tabela = {
-        "products": ["id", "name", "price", "description", "status", "date_created_gmt", "date_modified_gmt"],
-        "customers": ["id", "email", "first_name", "last_name", "username", "shipping", "date_created_gmt", "date_modified_gmt"],
-        "orders": ["id", "customer_id", "total", "discount_total", "shipping_total", "payment_method", "date_created_gmt", "date_modified_gmt", "shipping", "date_completed_gmt"],
-        "coupons": ["id", "code", "amount", "product_ids", "date_created_gmt", "date_modified_gmt", "date_expires", "free_shipping", "product_categories"]
-    }
+    montados = list()
+    primeira_vez = True
 
     def compose(self):
         yield Header()
@@ -29,7 +26,9 @@ class TelaConsulta(Screen):
             yield Input(placeholder="pesquise aqui")
             yield Button("Remover")
         yield TextArea(read_only=True)
-        yield DataTable()
+        with HorizontalGroup():
+            yield SelectionList[str]()
+            yield DataTable()
         yield Footer()
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated):
@@ -38,6 +37,22 @@ class TelaConsulta(Screen):
 
     def on_screen_resume(self):
         self.query_one(Tabs).active = self.query_one("#tab_consultar", Tab).id
+        self.atualizar()
+
+    @on(SelectionList.SelectedChanged)
+    def update_selected_view(self):
+        lista_selecionados = self.query_one(SelectionList).selected
+
+        for valor in self.montados:
+            if valor not in lista_selecionados:
+                self.montados.remove(valor)
+            if valor in lista_selecionados:
+                lista_selecionados.remove(valor)
+
+        if len(lista_selecionados) > 0:
+            for valor in lista_selecionados:
+                self.montados.append(valor)
+
         self.atualizar()
 
     def on_button_pressed(self):
@@ -52,12 +67,34 @@ class TelaConsulta(Screen):
         match evento.select.value:
             case "Products":
                 self.tabela = "products"
+                self.query_one(SelectionList).clear_options()
+
+                self.query_one(SelectionList).add_options((name, name)
+                                                          for name in list(Init.um_produto.__dict__.keys())[1:])
+                if self.primeira_vez:
+                    self.montados = [
+                        "name", "regular_price", "description"]
+                    for valor in ["name", "regular_price", "description"]:
+                        self.query_one(SelectionList).select(valor)
+                    self.primeira_vez = False
+
             case "Customers":
                 self.tabela = "customers"
+                self.query_one(SelectionList).clear_options()
+                self.query_one(SelectionList).add_options((name, name)
+                                                          for name in list(Init.um_cliente.__dict__.keys())[1:])
+
             case "Coupons":
                 self.tabela = "coupons"
+                self.query_one(SelectionList).clear_options()
+                self.query_one(SelectionList).add_options((name, name)
+                                                          for name in list(Init.um_cupom.__dict__.keys())[1:])
+
             case "Orders":
                 self.tabela = "orders"
+                self.query_one(SelectionList).clear_options()
+                self.query_one(SelectionList).add_options((name, name)
+                                                          for name in list(Init.um_pedido.__dict__.keys())[1:])
         self.atualizar()
 
     def atualizar(self):
@@ -77,7 +114,7 @@ class TelaConsulta(Screen):
         lista_chaves = []
         for produto in lista:
             for chave, dados in produto.items():
-                if dados and (chave not in lista_chaves) and (chave in self.filtros_tabela[self.tabela]):
+                if dados and (chave not in lista_chaves) and (chave in self.montados):
                     if isinstance(dados, dict):
                         dados = "".join(dados.values())
                         if not dados:
@@ -111,7 +148,6 @@ class TelaConsulta(Screen):
             table.add_row(*row, height=3)
 
     def filtro(self, palavras, index, filtro_recebido):
-        lista_filtros = ["id", "customer_id"]
         nova_lista = []
 
         if index + 1 < len(palavras):
@@ -125,67 +161,60 @@ class TelaConsulta(Screen):
                     if filtro.index("-")+1 < len(filtro) and palavraa not in nova_lista:
                         nova_lista.append(palavraa.strip())
 
-            if filtro_recebido in lista_filtros:
-                try:
-                    filtro = int(filtro)
-                except ValueError:
-                    self.notify("Valor Inválido")
-                    return
-
             if len(self.lista_produtos_filtrados) > 0:
                 produtos_temp = []
                 if len(nova_lista) > 0:
                     for p in nova_lista:
                         for produto in self.lista_produtos_filtrados:
-                            if type(filtro) == int:
-                                if p == produto[filtro_recebido] and produto not in produtos_temp:
+                            try:
+                                if p in produto[filtro_recebido] and produto not in produtos_temp:
                                     produtos_temp.append(
                                         produto)
-                            else:
-                                if p in produto[filtro_recebido] and produto not in produtos_temp:
+                            except:
+                                if p == produto[filtro_recebido] and produto not in produtos_temp:
                                     produtos_temp.append(
                                         produto)
                 else:
                     for produto in self.lista_produtos_filtrados:
-                        if type(filtro) == int:
-                            if filtro == produto[filtro_recebido] and produto not in produtos_temp:
-                                produtos_temp.append(produto)
-                        else:
+                        try:
                             if filtro in produto[filtro_recebido] and produto not in produtos_temp:
                                 produtos_temp.append(produto)
+                        except:
+                            if filtro == produto[filtro_recebido] and produto not in produtos_temp:
+                                produtos_temp.append(produto)
+
                 if len(produtos_temp) > 0:
                     self.lista_produtos_filtrados = produtos_temp
             else:
                 if len(nova_lista) > 0:
                     for p in nova_lista:
                         for produto in self.lista_produtos:
-                            if type(filtro) == int:
-                                if p == produto[filtro_recebido] and produto not in self.lista_produtos_filtrados:
-                                    self.lista_produtos_filtrados.append(
-                                        produto)
-                            else:
+                            try:
                                 if p in produto[filtro_recebido] and produto not in self.lista_produtos_filtrados:
                                     self.lista_produtos_filtrados.append(
                                         produto)
+                            except:
+                                if p == produto[filtro_recebido] and produto not in self.lista_produtos_filtrados:
+                                    self.lista_produtos_filtrados.append(
+                                        produto)
+
                 else:
                     for produto in self.lista_produtos:
-                        if type(filtro) == int:
-                            if filtro == produto[filtro_recebido] and produto not in self.lista_produtos_filtrados:
-                                self.lista_produtos_filtrados.append(produto)
-                        else:
+                        try:
                             if filtro in produto[filtro_recebido] and produto not in self.lista_produtos_filtrados:
+                                self.lista_produtos_filtrados.append(produto)
+                        except:
+                            if filtro == produto[filtro_recebido] and produto not in self.lista_produtos_filtrados:
                                 self.lista_produtos_filtrados.append(produto)
 
     def on_input_changed(self, evento: Input.Changed):
         texto = evento.value
         palavras = texto.split()
-        lista = ["name:", "id:", "price:", "description:", "email:",
-                 "first_name", "last_name", "code", "amount", "date_expires"]
 
         if len(palavras) > 0:
             self.lista_produtos_filtrados = []
             for palavra in palavras:
-                if palavra.lower() in lista:
+                if palavra.lower() in self.montados:
                     index = palavras.index(palavra)
                     self.filtro(palavras, index, palavra[:-1].lower())
                     self.atualizar()

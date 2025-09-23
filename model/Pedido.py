@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class Oders:
+class Pedido:
     def __init__(self):
         self.id = 0  # Unique identifier for the resource.read-only
         self.parent_id = 0  # Parent order ID.
