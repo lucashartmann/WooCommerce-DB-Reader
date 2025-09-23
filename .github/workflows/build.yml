@@ -29,7 +29,7 @@ jobs:
           pyinstaller --onedir `
               --add-data "view/css;view/css" `
               --add-data "view/Woocommerce/css;view/Woocommerce/css" `
-              --name WoocomerceDB 
+              --name WoocomerceDB `
               Main.py
 
       - name: Fazer upload do artefato
