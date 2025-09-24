@@ -29,9 +29,10 @@ class TelaCadastro(Screen):
                 yield Input(placeholder="preço aqui", classes="regular_price")
                 yield Static("Description", classes="description")
                 yield Input(placeholder="Descrição aqui", id="input_descricao", classes="description")
-                yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
-                yield Select([("Adicionar", "Adicionar"), ("Editar", "Editar"), ("Remover", "Remover")], allow_blank=False, id="select_operacoes")
-                yield Button("Executar")
+                with HorizontalGroup(id="hg_operacoes"):
+                    yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
+                    yield Select([("Adicionar", "Adicionar"), ("Editar", "Editar"), ("Remover", "Remover")], allow_blank=False, id="select_operacoes")
+                    yield Button("Executar")
         yield Footer()
 
     contador = 0
@@ -51,8 +52,8 @@ class TelaCadastro(Screen):
             for valor in lista_selecionados:
                 if not self.query(f".{valor}"):
                     self.mount(Static(content=valor.capitalize(),
-                            classes=valor), before=self.query_one(Select))
-                    self.mount(Input(classes=valor), before=self.query_one(Select))
+                            classes=valor), before=self.query_one("#hg_operacoes", HorizontalGroup))
+                    self.mount(Input(classes=valor), before=self.query_one("#hg_operacoes", HorizontalGroup))
                     self.montados.append(valor)
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated):

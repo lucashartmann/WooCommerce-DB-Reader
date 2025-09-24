@@ -1,5 +1,6 @@
 Input {
-    width: 70%;
+    width: auto;
+    min-width: 70%;
 }
 
 TelaCadastro Grid {
@@ -12,9 +13,6 @@ TelaCadastro {
     color: black;
 }
 
-TelaCadastro #stt_nome {
-    column-span: 3;
-}
 
 TelaCadastro #input_descricao {
     width: auto;
