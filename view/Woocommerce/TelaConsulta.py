@@ -35,9 +35,12 @@ class TelaConsulta(Screen):
         if event.tabs.active == self.query_one("#tab_cadastrar", Tab).id:
             self.app.switch_screen("tela_cadastro")
 
+    def on_mount(self):
+        self.lista_produtos, _ = API.get_lista_itens(self.tabela)
+
     def on_screen_resume(self):
         self.query_one(Tabs).active = self.query_one("#tab_consultar", Tab).id
-        self.atualizar()
+        self.atualizar() # Remover isso, implementar mensagens ou outro
 
     @on(SelectionList.SelectedChanged)
     def update_selected_view(self):
@@ -68,9 +71,9 @@ class TelaConsulta(Screen):
             case "Products":
                 self.tabela = "products"
                 self.query_one(SelectionList).clear_options()
-
+                self.query_one(SelectionList).add_option(("id", "id"))
                 self.query_one(SelectionList).add_options((name, name)
-                                                          for name in list(Init.um_produto.__dict__.keys())[1:])
+                                                          for name in list(Init.um_produto.__dict__.keys()))
                 if self.primeira_vez:
                     self.montados = [
                         "name", "regular_price", "description"]
@@ -81,20 +84,23 @@ class TelaConsulta(Screen):
             case "Customers":
                 self.tabela = "customers"
                 self.query_one(SelectionList).clear_options()
+                self.query_one(SelectionList).add_option(("id", "id"))
                 self.query_one(SelectionList).add_options((name, name)
-                                                          for name in list(Init.um_cliente.__dict__.keys())[1:])
+                                                          for name in list(Init.um_cliente.__dict__.keys()))
 
             case "Coupons":
                 self.tabela = "coupons"
                 self.query_one(SelectionList).clear_options()
+                self.query_one(SelectionList).add_option(("id", "id"))
                 self.query_one(SelectionList).add_options((name, name)
-                                                          for name in list(Init.um_cupom.__dict__.keys())[1:])
+                                                          for name in list(Init.um_cupom.__dict__.keys()))
 
             case "Orders":
                 self.tabela = "orders"
                 self.query_one(SelectionList).clear_options()
+                self.query_one(SelectionList).add_option(("id", "id"))
                 self.query_one(SelectionList).add_options((name, name)
-                                                          for name in list(Init.um_pedido.__dict__.keys())[1:])
+                                                          for name in list(Init.um_pedido.__dict__.keys()))
         self.atualizar()
 
     def atualizar(self):
@@ -214,7 +220,7 @@ class TelaConsulta(Screen):
         if len(palavras) > 0:
             self.lista_produtos_filtrados = []
             for palavra in palavras:
-                if palavra.lower() in self.montados:
+                if palavra[:-1].lower() in self.montados:
                     index = palavras.index(palavra)
                     self.filtro(palavras, index, palavra[:-1].lower())
                     self.atualizar()

@@ -1,10 +1,11 @@
-from textual.widgets import Button, Static, Input, Select, Tab, Tabs, Header, Footer, SelectionList
+from textual.widgets import Button, Static, Input, Select, Tab, Tabs, Header, Footer, SelectionList, MaskedInput
 from controller import Controller
 from unidecode import unidecode
 from textual.screen import Screen
-from textual.containers import Grid, HorizontalGroup
+from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual import on
 from model import Init
+from datetime import datetime
 
 
 class TelaCadastro(Screen):
@@ -22,13 +23,14 @@ class TelaCadastro(Screen):
         yield Tabs(Tab("TelaCadastrar", id="tab_cadastrar"), Tab("TelaConsultar", id="tab_consultar"))
         with HorizontalGroup():
             yield SelectionList[str]()
-            with Grid():
-                yield Static("Name", classes="name")
-                yield Input(placeholder="nome aqui", id="stt_nome", classes="name")
-                yield Static("Regular_Price", classes="regular_price")
-                yield Input(placeholder="preço aqui", classes="regular_price")
-                yield Static("Description", classes="description")
-                yield Input(placeholder="Descrição aqui", id="input_descricao", classes="description")
+            with VerticalGroup():
+                with Grid():
+                    yield Static("Name", classes="name")
+                    yield Input(placeholder="nome aqui", id="stt_nome", classes="name")
+                    yield Static("Regular_Price", classes="regular_price")
+                    yield Input(placeholder="preço aqui", classes="regular_price")
+                    yield Static("Description", classes="description")
+                    yield Input(placeholder="Descrição aqui", id="input_descricao", classes="description")
                 with HorizontalGroup(id="hg_operacoes"):
                     yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
                     yield Select([("Adicionar", "Adicionar"), ("Editar", "Editar"), ("Remover", "Remover")], allow_blank=False, id="select_operacoes")
@@ -44,16 +46,41 @@ class TelaCadastro(Screen):
         for valor in self.montados:
             if valor not in lista_selecionados:
                 self.montados.remove(valor)
-                self.query(f".{valor}").remove()
+                self.query_one(Grid).query(f".{valor}").remove()
             else:
                 lista_selecionados.remove(valor)
+
+        objeto = ""
+        match self.tabela:
+            case "products":
+                objeto = Init.um_produto
+            case "orders":
+                objeto = Init.um_pedido
+            case "customers":
+                objeto = Init.um_cliente
+            case "coupons":
+                objeto = Init.um_cupom
 
         if len(lista_selecionados) > 0:
             for valor in lista_selecionados:
                 if not self.query(f".{valor}"):
-                    self.mount(Static(content=valor.capitalize(),
-                            classes=valor), before=self.query_one("#hg_operacoes", HorizontalGroup))
-                    self.mount(Input(classes=valor), before=self.query_one("#hg_operacoes", HorizontalGroup))
+                    self.query_one(Grid).mount(Static(content=valor.capitalize(),
+                                                      classes=valor))
+                    
+                    for key, valor_construtor in objeto.__dict__.items():
+                        if key == valor:
+                            if isinstance(valor_construtor, str):
+                                self.query_one(Grid).mount(
+                                    Input(classes=valor))
+                            elif isinstance(valor_construtor, bool):
+                                self.query_one(Grid).mount(
+                                    Select([("True", True), ("False", False)], classes=valor, allow_blank=False))
+                            elif isinstance(valor_construtor, datetime):
+                                self.query_one(Grid).mount(MaskedInput(
+                                    template='00/00/0000', placeholder="dd/mm/yyyy", classes=valor))
+                            else:
+                                self.query_one(Grid).mount(
+                                    Input(classes=valor))  # Arrumar
                     self.montados.append(valor)
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated):
@@ -76,7 +103,7 @@ class TelaCadastro(Screen):
                     self.query_one(SelectionList).clear_options()
 
                     self.query_one(SelectionList).add_options((name, name)
-                                                              for name in list(Init.um_produto.__dict__.keys())[1:])
+                                                              for name in Init.um_produto.__dict__.keys())
                     if self.primeira_vez:
                         self.montados = [
                             "name", "regular_price", "description"]
@@ -86,59 +113,71 @@ class TelaCadastro(Screen):
                     else:
                         self.query_one(Grid).remove_children(Input)
                         self.query_one(Grid).remove_children(Static)
+                        # self.query_one(Grid).remove_children(Select)
+                        self.query_one(Grid).remove_children(MaskedInput)
 
                 case "Customers":
                     self.tabela = "customers"
                     self.query_one(SelectionList).clear_options()
                     self.query_one(Grid).remove_children(Input)
                     self.query_one(Grid).remove_children(Static)
+                    # self.query_one(Grid).remove_children(Select)
+                    self.query_one(Grid).remove_children(MaskedInput)
                     self.query_one(SelectionList).add_options((name, name)
-                                                              for name in list(Init.um_cliente.__dict__.keys())[1:])
+                                                              for name in Init.um_cliente.__dict__.keys())
 
                 case "Coupons":
                     self.tabela = "coupons"
                     self.query_one(SelectionList).clear_options()
                     self.query_one(Grid).remove_children(Input)
                     self.query_one(Grid).remove_children(Static)
+                    # self.query_one(Grid).remove_children(Select)
+                    self.query_one(Grid).remove_children(MaskedInput)
                     self.query_one(SelectionList).add_options((name, name)
-                                                              for name in list(Init.um_cupom.__dict__.keys())[1:])
+                                                              for name in Init.um_cupom.__dict__.keys())
 
                 case "Orders":
                     self.tabela = "orders"
                     self.query_one(SelectionList).clear_options()
                     self.query_one(Grid).remove_children(Input)
                     self.query_one(Grid).remove_children(Static)
+                    # self.query_one(Grid).remove_children(Select)
+                    self.query_one(Grid).remove_children(MaskedInput)
                     self.query_one(SelectionList).add_options((name, name)
-                                                              for name in list(Init.um_pedido.__dict__.keys())[1:])
+                                                              for name in Init.um_pedido.__dict__.keys())
 
         else:
             match evento.select.value:
 
                 case "Editar":
+                    self.query_one(SelectionList).disabled = False
                     if self.montou == False:
                         self.query_one(Grid).mount(Static("ID de pesquisa",
                                                           id="stt_id_pesquisa"), before=0)
                         self.query_one(Grid).mount(Input(placeholder="id do produto de pesquisa",
                                                          id="inpt_id_pesquisa"), before=1)
                         self.montou = True
-                    else:
-                        self.query_one(SelectionList).disabled = False
                     self.valor_select = "Editar"
 
                 case "Adicionar":
                     self.valor_select = "Adicionar"
                     if self.montou:
                         self.query_one(SelectionList).disabled = False
-                        self.query_one("#stt_id_pesquisa", Static).remove()
-                        self.query_one("#inpt_id_pesquisa", Input).remove()
+                        try:
+                            self.query_one(Grid).query_one("#stt_id_pesquisa", Static).remove()
+                            self.query_one(Grid).query_one("#inpt_id_pesquisa", Input).remove()
+                        except:
+                            pass
                         self.montou = False
 
                 case "Remover":
+                    self.montados = []
+                    self.query_one(Grid).remove_children(Static)
+                    self.query_one(Grid).remove_children(Input)
+                    # self.query_one(Grid).remove_children(Select)
+                    self.query_one(Grid).remove_children(MaskedInput)
+                    self.query_one(SelectionList).disabled = True
                     if self.montou == False:
-                        self.montados = []
-                        self.query_one(Grid).remove_children(Static)
-                        self.query_one(Grid).remove_children(Input)
-                        self.query_one(SelectionList).disabled = True
                         self.query_one(Grid).mount(Static("ID de pesquisa",
                                                           id="stt_id_pesquisa"), before=0)
                         self.query_one(Grid).mount(Input(placeholder="id do produto de pesquisa",
@@ -154,9 +193,11 @@ class TelaCadastro(Screen):
         match self.valor_select:
             case "Editar":
                 id_produto = self.query_one("#inpt_id_pesquisa", Input).value
+                # self.query_one(Grid).query_children(Select).value
+                # self.query_one(Grid).query_children(MaskedInput).value
                 dados = dict()
                 lista_chaves = [static for static in self.query_one(Grid).query(Static)[
-                    1:-6]]
+                    1:]]
                 lista_valores = [input for input in self.query_one(Grid).query(Input)[
                     1:]]
 
@@ -174,8 +215,10 @@ class TelaCadastro(Screen):
 
             case "Adicionar":
                 dados = dict()
-                lista_chaves = [static for static in self.query_one(Grid).query(Static)[
-                    :-6]]
+                # self.query_one(Grid).query_children(Select).value
+                # self.query_one(Grid).query_children(MaskedInput).value
+                lista_chaves = [
+                    static for static in self.query_one(Grid).query(Static)]
                 lista_valores = [
                     input for input in self.query_one(Grid).query(Input)]
 

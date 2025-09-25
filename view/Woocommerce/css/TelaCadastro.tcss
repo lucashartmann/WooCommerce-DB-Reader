@@ -3,6 +3,10 @@ Input {
     min-width: 70%;
 }
 
+Select {
+    width: 70%;
+}
+
 TelaCadastro Grid {
     grid-size: 2;
     align: center middle;
@@ -26,4 +30,12 @@ Tab {
 SelectionList {
     width: 25%;
     height: 100%;
+}
+
+#hg_operacoes Select {
+    width: 30%;
+}
+
+#hg_operacoes Button {
+    width: 38%;
 }

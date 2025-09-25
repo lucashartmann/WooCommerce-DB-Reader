@@ -1,18 +1,11 @@
 from datetime import datetime
 
 class Cupom:
-    def __init__(self, code):
+    def __init__(self, code:str):
         self.id = 0  # Unique identifier for the object.read-only
         self.code = code  # Coupon code.mandatory
         # The amount of discount. Should always be numeric, even if setting a percentage.
         self.amount = ""
-        # The date the coupon was created, in the site's timezone.read-only
-        self.date_create: datetime
-        self.date_created_gmt: datetime  # The date the coupon was created, as GMT.read-only
-        # The date the coupon was last modified, in the site's timezone.read-only
-        self.date_modified: datetime
-        # The date the coupon was last modified, as GMT.read-only
-        self.date_modified_gmt: datetime
         # Determines the type of discount that will be applied. Options: percent, fixed_cart and fixed_product. Default is fixed_cart.
         self.discount_type = ""
         self.description = ""  # Coupon description.
