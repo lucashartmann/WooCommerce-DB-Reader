@@ -1,14 +1,21 @@
 from api import API
 from database import Shelve
-from model import Produto, Pedido, Cliente, Cupom
+from model import Produto, Pedido, Cliente, Cupom, Relatorio, Taxa, Reembolso
+
 
 class Init:
-    
+
     um_produto = Produto.Produto()
     um_cliente = Cliente.Cliente("asds")
     um_pedido = Pedido.Pedido()
     um_cupom = Cupom.Cupom("qwdsadas")
+    uma_taxa = Taxa.Taxa()
+    um_reembolso = Reembolso.Reembolso()
+    um_relatorio = Relatorio.Relatorio()
 
+    dict_objetos = {
+        "products": um_produto, "orders": um_pedido,  "customers": um_cliente, "coupons": um_cupom,   "taxes": uma_taxa,  "refunds": um_reembolso, "reports": um_relatorio
+    }
 
     dados = Shelve.carregar("dados.db", "login")
     if dados:
@@ -49,7 +56,6 @@ class Init:
         print(API.adicionar("products", data))
 
         print(API.get_lista_itens("products"))
-
 
     if len(API.get_lista_itens("orders")) < 1:
 

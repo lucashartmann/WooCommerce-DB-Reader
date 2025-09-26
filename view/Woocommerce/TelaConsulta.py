@@ -1,5 +1,5 @@
 from textual.containers import HorizontalGroup
-from textual.widgets import Button, Static, TextArea, Input, DataTable, Select, Tabs, Tab, Header, Footer, SelectionList
+from textual.widgets import Button, TextArea, Input, DataTable, Select, Tabs, Tab, Header, Footer, SelectionList
 from api import API
 from controller import Controller
 from textual.screen import Screen
@@ -22,7 +22,7 @@ class TelaConsulta(Screen):
         yield Header()
         yield Tabs(Tab("TelaCadastrar", id="tab_cadastrar"), Tab("TelaConsultar", id="tab_consultar"))
         with HorizontalGroup():
-            yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons")], allow_blank=False)
+            yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes"), ("Refunds", "Refunds"), ("Reports", "Reports")], allow_blank=False)
             yield Input(placeholder="pesquise aqui")
             yield Button("Remover")
         yield TextArea(read_only=True)
@@ -40,7 +40,7 @@ class TelaConsulta(Screen):
 
     def on_screen_resume(self):
         self.query_one(Tabs).active = self.query_one("#tab_consultar", Tab).id
-        self.atualizar() # Remover isso, implementar mensagens ou outro
+        self.atualizar()  # Remover isso, implementar mensagens ou outro
 
     @on(SelectionList.SelectedChanged)
     def update_selected_view(self):
@@ -67,40 +67,21 @@ class TelaConsulta(Screen):
             input.value = ""
 
     def on_select_changed(self, evento: Select.Changed):
-        match evento.select.value:
-            case "Products":
-                self.tabela = "products"
-                self.query_one(SelectionList).clear_options()
-                self.query_one(SelectionList).add_option(("id", "id"))
-                self.query_one(SelectionList).add_options((name, name)
-                                                          for name in list(Init.um_produto.__dict__.keys()))
-                if self.primeira_vez:
-                    self.montados = [
-                        "name", "regular_price", "description"]
-                    for valor in ["name", "regular_price", "description"]:
-                        self.query_one(SelectionList).select(valor)
-                    self.primeira_vez = False
+        self.tabela = evento.select.value.lower()
+        self.query_one(SelectionList).clear_options()
+        self.query_one(SelectionList).add_option(("id", "id"))
+        if self.tabela != "refunds":
+            self.query_one(SelectionList).add_options((name, name)
+                                                      for name in list(Init.dict_objetos[self.tabela].__dict__.keys()))
 
-            case "Customers":
-                self.tabela = "customers"
-                self.query_one(SelectionList).clear_options()
-                self.query_one(SelectionList).add_option(("id", "id"))
-                self.query_one(SelectionList).add_options((name, name)
-                                                          for name in list(Init.um_cliente.__dict__.keys()))
+        if evento.select.value == "Products":
+            if self.primeira_vez:
+                self.montados = [
+                    "name", "regular_price", "description"]
+                for valor in self.montados:
+                    self.query_one(SelectionList).select(valor)
+                self.primeira_vez = False
 
-            case "Coupons":
-                self.tabela = "coupons"
-                self.query_one(SelectionList).clear_options()
-                self.query_one(SelectionList).add_option(("id", "id"))
-                self.query_one(SelectionList).add_options((name, name)
-                                                          for name in list(Init.um_cupom.__dict__.keys()))
-
-            case "Orders":
-                self.tabela = "orders"
-                self.query_one(SelectionList).clear_options()
-                self.query_one(SelectionList).add_option(("id", "id"))
-                self.query_one(SelectionList).add_options((name, name)
-                                                          for name in list(Init.um_pedido.__dict__.keys()))
         self.atualizar()
 
     def atualizar(self):

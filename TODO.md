@@ -1,9 +1,5 @@
-### Main
+### TelaCadastro
 
-    - Arrumar sys.argv
-
-### view
-
-    - Implementar mais atributos de cada tabela
+- Arrumar linha 172 
 
 - Fazer orientado a objetos?

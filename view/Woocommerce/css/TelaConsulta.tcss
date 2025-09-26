@@ -15,6 +15,7 @@ TelaConsulta HorizontalGroup {
 
 TelaConsulta DataTable {
     margin: 2;
+    height: 100%;
 }
 
 TelaConsulta DataTable Row {

@@ -1,0 +1,2 @@
+class Reembolso:
+    pass
