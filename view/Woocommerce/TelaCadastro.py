@@ -88,7 +88,6 @@ class TelaCadastro(Screen):
 
     def on_screen_resume(self):
         self.query_one(Tabs).active = self.query_one("#tab_cadastrar", Tab).id
-        print("Lucas")
 
     def on_select_changed(self, evento: Select.Changed):
 

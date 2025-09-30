@@ -17,7 +17,6 @@ class Login(Screen):
         yield Button("Entrar")
 
     def on_button_pressed(self):
-        print("Lucas")
         dados = []
         for input in self.query(Input):
             dados.append(input.value)
