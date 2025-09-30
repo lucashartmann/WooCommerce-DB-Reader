@@ -7,7 +7,6 @@ from textual import on
 from model import Init
 from datetime import datetime
 from textual.message import Message
-from view.Woocommerce import TelaConsulta
 
 
 class CadastroRealizado(Message):
@@ -41,7 +40,7 @@ class TelaCadastro(Screen):
                     yield Static("Description", classes="description")
                     yield Input(placeholder="Descrição aqui", id="input_descricao", classes="description")
                 with HorizontalGroup(id="hg_operacoes"):
-                    yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes"), ("Refunds", "Refunds"), ("Reports", "Reports")], allow_blank=False)
+                    yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes")], allow_blank=False)
                     yield Select([("Adicionar", "Adicionar"), ("Editar", "Editar"), ("Remover", "Remover")], allow_blank=False, id="select_operacoes")
                     yield Button("Executar")
         yield Footer()
@@ -79,7 +78,8 @@ class TelaCadastro(Screen):
 
                             else:
                                 self.query_one(Grid).mount(
-                                    Input(classes=valor))  # Arrumar
+                                    # TODO: Tem que lidar com listas, data, objetos...
+                                    Input(classes=valor))
                     self.montados.append(valor)
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated):
@@ -99,9 +99,8 @@ class TelaCadastro(Screen):
                 self.montados = []
                 self.query_one(Grid).remove_children()
 
-            if self.tabela != "refunds":
-                self.query_one(SelectionList).add_options((name, name)
-                                                          for name in Init.dict_objetos[self.tabela].__dict__.keys())
+            self.query_one(SelectionList).add_options((name, name)
+                                                      for name in Init.dict_objetos[self.tabela].__dict__.keys() if not name.startswith("_"))
 
             if evento.select.value == "Products":
                 if self.primeira_vez:
@@ -144,12 +143,12 @@ class TelaCadastro(Screen):
                     self.montados = []
                     self.query_one(SelectionList).disabled = True
 
-                    if self.montou_editar:
-                        self.query_one(Grid).query_children()[
-                            1:].remove()  # Arrumar
+                    if self.montou_editar and self.montou_remover == False:
+                        self.query_one(Grid).remove_children(
+                            list(self.query_one(Grid).query_children()[2:]))
                         self.montou_editar = False
-
-                    if self.montou_remover == False:
+                        self.montou_remover = True
+                    else:
                         self.query_one(Grid).remove_children()
                         self.query_one(Grid).mount(Static("ID de pesquisa",
                                                           id="stt_id_pesquisa"), before=0)
@@ -163,7 +162,7 @@ class TelaCadastro(Screen):
         for input in self.query(Input):
             input.value = ""
 
-    def on_button_pressed(self, evento: Button.Pressed):
+    def on_button_pressed(self):
         lista_valores = [widget for widget in self.query_one(
             Grid).query() if not isinstance(widget, Static)]
         lista_chaves = [

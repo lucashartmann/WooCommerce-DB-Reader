@@ -1,6 +1,6 @@
 from api import API
 from database import Shelve
-from model import Produto, Pedido, Cliente, Cupom, Relatorio, Taxa, Reembolso
+from model import Produto, Pedido, Cliente, Cupom, Taxa
 
 
 class Init:
@@ -10,11 +10,9 @@ class Init:
     um_pedido = Pedido.Pedido()
     um_cupom = Cupom.Cupom("qwdsadas")
     uma_taxa = Taxa.Taxa()
-    um_reembolso = Reembolso.Reembolso()
-    um_relatorio = Relatorio.Relatorio()
 
     dict_objetos = {
-        "products": um_produto, "orders": um_pedido,  "customers": um_cliente, "coupons": um_cupom,   "taxes": uma_taxa,  "refunds": um_reembolso, "reports": um_relatorio
+        "products": um_produto, "orders": um_pedido,  "customers": um_cliente, "coupons": um_cupom,   "taxes": uma_taxa
     }
 
     dados = Shelve.carregar("dados.db", "login")

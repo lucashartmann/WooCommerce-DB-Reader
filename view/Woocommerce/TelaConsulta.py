@@ -22,7 +22,7 @@ class TelaConsulta(Screen):
         yield Header()
         yield Tabs(Tab("TelaCadastrar", id="tab_cadastrar"), Tab("TelaConsultar", id="tab_consultar"))
         with HorizontalGroup():
-            yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes"), ("Refunds", "Refunds"), ("Reports", "Reports")], allow_blank=False)
+            yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes")], allow_blank=False)
             yield Input(placeholder="pesquise aqui")
             yield Button("Remover")
         yield TextArea(read_only=True)
@@ -65,13 +65,17 @@ class TelaConsulta(Screen):
         for input in self.query(Input):
             input.value = ""
 
+    def limpar_nome(self, name):
+        if "__" in name:
+            return name.split("__", 1)[1]
+        return name.lstrip("_")
+
     def on_select_changed(self, evento: Select.Changed):
         self.tabela = evento.select.value.lower()
         self.query_one(SelectionList).clear_options()
-        self.query_one(SelectionList).add_option(("id", "id"))
-        if self.tabela != "refunds":
-            self.query_one(SelectionList).add_options((name, name)
-                                                      for name in list(Init.dict_objetos[self.tabela].__dict__.keys()))
+
+        self.query_one(SelectionList).add_options((self.limpar_nome(name), self.limpar_nome(name))
+                                                  for name in list(Init.dict_objetos[self.tabela].__dict__.keys()))
 
         if evento.select.value == "Products":
             if self.primeira_vez:
