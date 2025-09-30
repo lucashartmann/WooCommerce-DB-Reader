@@ -6,6 +6,14 @@ from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual import on
 from model import Init
 from datetime import datetime
+from textual.message import Message
+from view.Woocommerce import TelaConsulta
+
+
+class CadastroRealizado(Message):
+    def __init__(self, sender) -> None:
+        super().__init__()
+        self.sender = sender
 
 
 class TelaCadastro(Screen):
@@ -80,6 +88,7 @@ class TelaCadastro(Screen):
 
     def on_screen_resume(self):
         self.query_one(Tabs).active = self.query_one("#tab_cadastrar", Tab).id
+        print("Lucas")
 
     def on_select_changed(self, evento: Select.Changed):
 
@@ -155,7 +164,7 @@ class TelaCadastro(Screen):
         for input in self.query(Input):
             input.value = ""
 
-    def on_button_pressed(self):
+    def on_button_pressed(self, evento: Button.Pressed):
         lista_valores = [widget for widget in self.query_one(
             Grid).query() if not isinstance(widget, Static)]
         lista_chaves = [
@@ -176,8 +185,13 @@ class TelaCadastro(Screen):
 
                 atualizacao = Controller.atualizar_item(
                     self.tabela, id_produto, dados)
+
                 self.notify(atualizacao)
                 self.limpar_inputs()
+                try:
+                    self.app.get_screen("tela_consultar").atualizar()
+                except:
+                    pass
 
             case "Adicionar":
                 dados = dict()
@@ -192,9 +206,17 @@ class TelaCadastro(Screen):
                 adicao = Controller.adicionar_item(self.tabela, dados)
                 self.notify(adicao)
                 self.limpar_inputs()
+                try:
+                    self.app.get_screen("tela_consultar").atualizar()
+                except:
+                    pass
 
             case "Remover":
                 id_produto = self.query_one(Input).value
                 remocao = Controller.remover_item(self.tabela, id_produto)
                 self.notify(remocao)
                 self.limpar_inputs()
+                try:
+                    self.app.get_screen("tela_consultar").atualizar()
+                except:
+                    pass

@@ -22,3 +22,5 @@ class App(App):
                 self.push_screen("tela_cadastro")
         else:
             self.push_screen("tela_login")
+
+  

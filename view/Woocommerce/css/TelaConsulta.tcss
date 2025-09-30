@@ -30,16 +30,16 @@ TelaConsulta Select {
     width: 22%;
 }
 
-Input {
+TelaConsulta Input {
     width: 70%;
 }
 
-Tab {
+TelaConsulta Tab {
     color: black;    
 }
 
-SelectionList {
-    width: 25%;
+TelaConsulta SelectionList {
+    width: 20%;
     height: 100%;
 }
 

@@ -1,4 +1,4 @@
-from textual.containers import HorizontalGroup
+from textual.containers import HorizontalGroup, HorizontalScroll
 from textual.widgets import Button, TextArea, Input, DataTable, Select, Tabs, Tab, Header, Footer, SelectionList
 from api import API
 from controller import Controller
@@ -26,7 +26,7 @@ class TelaConsulta(Screen):
             yield Input(placeholder="pesquise aqui")
             yield Button("Remover")
         yield TextArea(read_only=True)
-        with HorizontalGroup():
+        with HorizontalScroll():
             yield SelectionList[str]()
             yield DataTable()
         yield Footer()
@@ -36,11 +36,10 @@ class TelaConsulta(Screen):
             self.app.switch_screen("tela_cadastro")
 
     def on_mount(self):
-        self.lista_produtos, _ = API.get_lista_itens(self.tabela)
+        self.atualizar()
 
     def on_screen_resume(self):
         self.query_one(Tabs).active = self.query_one("#tab_consultar", Tab).id
-        self.atualizar()  # Remover isso, implementar mensagens ou outro
 
     @on(SelectionList.SelectedChanged)
     def update_selected_view(self):
