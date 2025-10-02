@@ -1,4 +1,3 @@
-
 TelaConsulta {
     background: rgb(200, 200, 200);
 }
@@ -6,20 +5,19 @@ TelaConsulta {
 TelaConsulta TextArea {
     color: rgba(19, 243, 67, 1);
     height: 20%;
+    width: 100%;
     margin: 2;
 }
 
 TelaConsulta HorizontalGroup {
     margin: 2;
+    width: 100%;
 }
 
 TelaConsulta DataTable {
-    margin: 2;
     height: 100%;
-}
-
-TelaConsulta DataTable Row {
-    margin: 2;
+    width: 100%;
+    margin-bottom: 2;
 }
 
 TelaConsulta DataTable Column {
@@ -39,7 +37,7 @@ TelaConsulta Tab {
 }
 
 TelaConsulta SelectionList {
+    margin: 0 0 2 2;
     width: 20%;
     height: 100%;
 }
-

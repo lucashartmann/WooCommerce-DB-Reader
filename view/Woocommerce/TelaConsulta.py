@@ -1,4 +1,4 @@
-from textual.containers import HorizontalGroup, HorizontalScroll
+from textual.containers import HorizontalGroup, Horizontal, HorizontalScroll
 from textual.widgets import Button, TextArea, Input, DataTable, Select, Tabs, Tab, Header, Footer, SelectionList
 from api import API
 from controller import Controller
@@ -26,7 +26,7 @@ class TelaConsulta(Screen):
             yield Input(placeholder="pesquise aqui")
             yield Button("Remover")
         yield TextArea(read_only=True)
-        with HorizontalScroll():
+        with Horizontal():
             yield SelectionList[str]()
             yield DataTable()
         yield Footer()

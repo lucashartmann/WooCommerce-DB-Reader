@@ -1,6 +1,17 @@
-Input {
+TextArea {
+    width: 70%;
+    min-height: 3;
+    height: auto;
+    color: white;
+}
+
+MaskedInput {
+    width: 70%;
+    color: white;
+}
+
+Button {
     width: auto;
-    min-width: 70%;
 }
 
 Select {
@@ -9,8 +20,20 @@ Select {
 
 TelaCadastro Grid {
     grid-size: 2;
+    grid-gutter: 5;
+    margin-bottom: 4; 
     align: center middle;
+    height: auto;
 }
+
+#hg_first {
+    height: auto;
+}
+
+VerticalGroup {
+    height: auto;
+}
+
 
 TelaCadastro {
     background: rgb(200, 200, 200);
@@ -28,8 +51,8 @@ Tab {
 }
 
 SelectionList {
-    width: 25%;
-    height: 100%;
+    width: auto;
+    height: auto;
 }
 
 #hg_operacoes Select {
