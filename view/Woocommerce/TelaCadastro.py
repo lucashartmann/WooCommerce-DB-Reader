@@ -1,4 +1,4 @@
-from textual.widgets import Button, Static, Input, Select, Tab, Tabs, Header, Footer, SelectionList, MaskedInput
+from textual.widgets import Button, Static, TextArea, Select, Tab, Tabs, Header, Footer, SelectionList, MaskedInput
 from controller import Controller
 from unidecode import unidecode
 from textual.screen import Screen
@@ -7,6 +7,7 @@ from textual import on
 from model import Init
 from datetime import datetime
 from textual.message import Message
+import datetime
 
 
 class CadastroRealizado(Message):
@@ -29,18 +30,18 @@ class TelaCadastro(Screen):
     def compose(self):
         yield Header()
         yield Tabs(Tab("TelaCadastrar", id="tab_cadastrar"), Tab("TelaConsultar", id="tab_consultar"))
-        with HorizontalGroup():
+        with HorizontalGroup(id="hg_first"):
             yield SelectionList[str]()
             with VerticalGroup():
                 with Grid():
                     yield Static("Name", classes="name")
-                    yield Input(placeholder="nome aqui", id="stt_nome", classes="name")
+                    yield TextArea(placeholder="nome aqui", id="stt_nome", classes="name")
                     yield Static("Regular_Price", classes="regular_price")
-                    yield Input(placeholder="preço aqui", classes="regular_price")
+                    yield TextArea(placeholder="preço aqui", classes="regular_price")
                     yield Static("Description", classes="description")
-                    yield Input(placeholder="Descrição aqui", id="input_descricao", classes="description")
+                    yield TextArea(placeholder="Descrição aqui", classes="description")
                 with HorizontalGroup(id="hg_operacoes"):
-                    yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes")], allow_blank=False)
+                    yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes")], allow_blank=False, id="select_tabelas")
                     yield Select([("Adicionar", "Adicionar"), ("Editar", "Editar"), ("Remover", "Remover")], allow_blank=False, id="select_operacoes")
                     yield Button("Executar")
         yield Footer()
@@ -61,25 +62,30 @@ class TelaCadastro(Screen):
         if len(lista_selecionados) > 0:
             for valor in lista_selecionados:
                 if not self.query(f".{valor}"):
-                    self.query_one(Grid).mount(Static(content=valor.capitalize(),
-                                                      classes=valor))
+                    
 
-                    for key, valor_construtor in self.objeto.__dict__.items():
+                    for key, valor_construtor in Init.dict_objetos[self.tabela].__dict__.items():
                         if key == valor:
                             if isinstance(valor_construtor, str):
+                                self.query_one(Grid).mount(Static(content=valor.capitalize(),
+                                                      classes=valor))
                                 self.query_one(Grid).mount(
-                                    Input(classes=valor))
+                                    TextArea(classes=valor))
                             elif isinstance(valor_construtor, bool):
+                                self.query_one(Grid).mount(Static(content=valor.capitalize(),
+                                                      classes=valor))
                                 self.query_one(Grid).mount(
                                     Select([("True", True), ("False", False)], classes=valor, allow_blank=False))
-                            elif isinstance(valor_construtor, datetime):
+                            elif isinstance(valor_construtor, datetime.datetime):
+                                self.query_one(Grid).mount(Static(content=valor.capitalize(),
+                                                      classes=valor))
                                 self.query_one(Grid).mount(MaskedInput(
-                                    template='00/00/0000', placeholder="dd/mm/yyyy", classes=valor))
-
+                                    template='00/00/0000 00:00', placeholder="dd/mm/yyyy hh:mm", classes=valor))
                             else:
-                                self.query_one(Grid).mount(
-                                    # TODO: Tem que lidar com listas, data, objetos...
-                                    Input(classes=valor))
+                                # TODO: Tem que lidar com listas, objetos...
+                                pass
+                                # self.query_one(Grid).mount(
+                                #     TextArea(classes=valor))
                     self.montados.append(valor)
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated):
@@ -91,7 +97,7 @@ class TelaCadastro(Screen):
 
     def on_select_changed(self, evento: Select.Changed):
 
-        if evento.select.id != "select_operacoes":
+        if evento.select.id == "select_tabelas":
             self.tabela = evento.select.value.lower()
             self.query_one(SelectionList).clear_options()
 
@@ -119,8 +125,8 @@ class TelaCadastro(Screen):
                     if self.montou_editar == False and self.montou_remover == False:
                         self.query_one(Grid).mount(Static("ID de pesquisa",
                                                           id="stt_id_pesquisa"), before=0)
-                        self.query_one(Grid).mount(Input(placeholder="id do produto de pesquisa",
-                                                         id="inpt_id_pesquisa"), before=1)
+                        self.query_one(Grid).mount(TextArea(placeholder="id do produto de pesquisa",
+                                                            id="inpt_id_pesquisa"), before=1)
                         self.montou_editar = True
 
                     self.valor_select = "Editar"
@@ -133,7 +139,7 @@ class TelaCadastro(Screen):
                             self.query_one(Grid).query_one(
                                 "#stt_id_pesquisa", Static).remove()
                             self.query_one(Grid).query_one(
-                                "#inpt_id_pesquisa", Input).remove()
+                                "#inpt_id_pesquisa", TextArea).remove()
                         except:
                             pass
                         self.montou_editar = False
@@ -152,15 +158,18 @@ class TelaCadastro(Screen):
                         self.query_one(Grid).remove_children()
                         self.query_one(Grid).mount(Static("ID de pesquisa",
                                                           id="stt_id_pesquisa"), before=0)
-                        self.query_one(Grid).mount(Input(placeholder="id do produto de pesquisa",
-                                                         id="inpt_id_pesquisa"), before=1)
+                        self.query_one(Grid).mount(TextArea(placeholder="id do produto de pesquisa",
+                                                            id="inpt_id_pesquisa"), before=1)
                         self.montou_remover = True
 
                     self.valor_select = "Remover"
 
-    def limpar_inputs(self):
-        for input in self.query(Input):
-            input.value = ""
+    def limpar_text_area(self):
+        for tx in self.query(TextArea):
+            tx.text = ""
+        if MaskedInput in self.query():
+            for m_i in self.query(MaskedInput):
+                m_i.value = ""
 
     def on_button_pressed(self):
         lista_valores = [widget for widget in self.query_one(
@@ -170,22 +179,40 @@ class TelaCadastro(Screen):
 
         match self.valor_select:
             case "Editar":
-                id_produto = self.query_one("#inpt_id_pesquisa", Input).value
+                id_produto = self.query_one("#inpt_id_pesquisa", TextArea).text
                 dados = dict()
-                lista_chaves = [lista_chaves[1:]]
+                lista_chaves = lista_chaves[1:]
 
-                for chave in lista_chaves:
-                    string_limpa = unidecode(chave.content.split()[0].lower())
+                for stt in lista_chaves:
+                    string_limpa = unidecode(stt.content.split()[0].lower())
                     dados[string_limpa] = ""
 
                 for i, valor in enumerate(lista_valores):
-                    dados[list(dados.keys())[i]] = valor.value
+                    if isinstance(valor, TextArea):
+                        dados[list(dados.keys())[i]] = valor.text
+                    elif isinstance(valor, MaskedInput):
+                        data_split = valor.value.split()
+                        data = data_split[1].split("/")
+                        dia = int(data[0])
+                        mes = int(data[1])
+                        ano = int(data[2])
+                        horario = data_split[1].split(":")
+                        hora = horario[0]
+                        minuto = horario[1]
+                        try:
+                            datahora = datetime.datetime(
+                                year=ano, month=mes, day=dia, hour=hora, minute=minuto)
+                        except Exception as e:
+                            self.notify(f"ERRO! Problema com data. {e}")
+                            return
+                        dados[list(dados.keys())[i]] = str(datahora)
+                    else:
+                        dados[list(dados.keys())[i]] = valor.value
 
                 atualizacao = Controller.atualizar_item(
                     self.tabela, id_produto, dados)
 
                 self.notify(atualizacao)
-                self.limpar_inputs()
                 try:
                     self.app.get_screen("tela_consultar").atualizar()
                 except:
@@ -199,22 +226,43 @@ class TelaCadastro(Screen):
                     dados[string_limpa] = ""
 
                 for i, valor in enumerate(lista_valores):
-                    dados[list(dados.keys())[i]] = valor.value
+                    if isinstance(valor, TextArea):
+                        dados[list(dados.keys())[i]] = valor.text
+                    elif isinstance(valor, MaskedInput):
+                        data_split = valor.value.split()
+                        data = data_split[1].split("/")
+                        dia = int(data[0])
+                        mes = int(data[1])
+                        ano = int(data[2])
+                        horario = data_split[1].split(":")
+                        hora = horario[0]
+                        minuto = horario[1]
+                        try:
+                            datahora = datetime.datetime(
+                                year=ano, month=mes, day=dia, hour=hora, minute=minuto)
+                        except Exception as e:
+                            self.notify(f"ERRO! Problema com data. {e}")
+                            return
+                        dados[list(dados.keys())[i]] = str(datahora)
+                    else:
+                        dados[list(dados.keys())[i]] = valor.value
 
                 adicao = Controller.adicionar_item(self.tabela, dados)
                 self.notify(adicao)
-                self.limpar_inputs()
+                self.limpar_text_area()
                 try:
                     self.app.get_screen("tela_consultar").atualizar()
                 except:
                     pass
 
             case "Remover":
-                id_produto = self.query_one(Input).value
+                id_produto = self.query_one(TextArea).text
                 remocao = Controller.remover_item(self.tabela, id_produto)
                 self.notify(remocao)
-                self.limpar_inputs()
+                self.limpar_text_area()
                 try:
                     self.app.get_screen("tela_consultar").atualizar()
                 except:
                     pass
+
+        self.limpar_text_area()
