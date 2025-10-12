@@ -1,7 +1,7 @@
 from textual.app import App
 from view import TelaLogin
 from database import Shelve
-from view.Woocommerce import TelaCadastro, TelaConsulta
+from view import TelaCadastro, TelaConsulta, TelaPerfil
 from controller import Controller
 
 class App(App):
@@ -9,7 +9,8 @@ class App(App):
     SCREENS = {
         "tela_login": TelaLogin.Login,
         "tela_cadastro": TelaCadastro.TelaCadastro,
-        "tela_consultar": TelaConsulta.TelaConsulta
+        "tela_consultar": TelaConsulta.TelaConsulta,
+        "tela_perfil": TelaPerfil.TelaPerfil
     }
 
     def on_mount(self):
@@ -21,6 +22,6 @@ class App(App):
             else:
                 self.push_screen("tela_cadastro")
         else:
-            self.push_screen("tela_cadastro")
+            self.push_screen("tela_login")
 
   

@@ -3,17 +3,17 @@ Login {
     background: rgba(47, 177, 112, 1)
 }
 
-Input {
+Login Input {
     margin-bottom: 1;
     width: 70%;
 }
 
-Select {
+Login Select {
     width: 20%;
     margin: 0 0 2 60;
 }
 
-Button {
+Login Button {
     margin-left: 61;
     width: 20%;
 }

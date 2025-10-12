@@ -8,6 +8,7 @@ from model import Init
 from datetime import datetime
 from textual.message import Message
 import datetime
+from database import Shelve
 
 
 class CadastroRealizado(Message):
@@ -23,16 +24,20 @@ class TelaCadastro(Screen):
     valor_select = ""
     tabela = "products"
     montados = list()
-    primeira_vez = True
     montou_remover = False
     montou_editar = False
+    perfis = None
+    perfil_atual = None
 
     def compose(self):
         yield Header()
-        yield Tabs(Tab("TelaCadastrar", id="tab_cadastrar"), Tab("TelaConsultar", id="tab_consultar"))
+        yield Tabs(Tab("TelaPerfil", id="tab_perfil"), Tab("TelaCadastrar", id="tab_cadastrar"), Tab("TelaConsultar", id="tab_consultar"))
         with HorizontalGroup(id="hg_first"):
-            yield SelectionList[str]()
-            with VerticalGroup():
+            with VerticalGroup(id="vg_left"):
+                yield Select([("Complex", "Complex")], allow_blank=False, id="select_perfil")
+                yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes")], allow_blank=False, id="select_tabelas")
+                yield SelectionList[str]()
+            with VerticalGroup(id="vg_right"):
                 with Grid():
                     yield Static("Name", classes="name")
                     yield TextArea(placeholder="nome aqui", id="stt_nome", classes="name")
@@ -41,7 +46,6 @@ class TelaCadastro(Screen):
                     yield Static("Description", classes="description")
                     yield TextArea(placeholder="Descrição aqui", classes="description")
                 with HorizontalGroup(id="hg_operacoes"):
-                    yield Select([("Products", "Products"), ("Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes")], allow_blank=False, id="select_tabelas")
                     yield Select([("Adicionar", "Adicionar"), ("Editar", "Editar"), ("Remover", "Remover")], allow_blank=False, id="select_operacoes")
                     yield Button("Executar")
         yield Footer()
@@ -62,23 +66,22 @@ class TelaCadastro(Screen):
         if len(lista_selecionados) > 0:
             for valor in lista_selecionados:
                 if not self.query(f".{valor}"):
-                    
 
                     for key, valor_construtor in Init.dict_objetos[self.tabela].__dict__.items():
                         if key == valor:
                             if isinstance(valor_construtor, str):
                                 self.query_one(Grid).mount(Static(content=valor.capitalize(),
-                                                      classes=valor))
+                                                                  classes=valor))
                                 self.query_one(Grid).mount(
                                     TextArea(classes=valor))
                             elif isinstance(valor_construtor, bool):
                                 self.query_one(Grid).mount(Static(content=valor.capitalize(),
-                                                      classes=valor))
+                                                                  classes=valor))
                                 self.query_one(Grid).mount(
                                     Select([("True", True), ("False", False)], classes=valor, allow_blank=False))
                             elif isinstance(valor_construtor, datetime.datetime):
                                 self.query_one(Grid).mount(Static(content=valor.capitalize(),
-                                                      classes=valor))
+                                                                  classes=valor))
                                 self.query_one(Grid).mount(MaskedInput(
                                     template='00/00/0000 00:00', placeholder="dd/mm/yyyy hh:mm", classes=valor))
                             else:
@@ -91,30 +94,53 @@ class TelaCadastro(Screen):
     def on_tabs_tab_activated(self, event: Tabs.TabActivated):
         if event.tabs.active == self.query_one("#tab_consultar", Tab).id:
             self.app.switch_screen("tela_consultar")
+        elif event.tabs.active == self.query_one("#tab_perfil", Tab).id:
+            self.app.switch_screen("tela_perfil")
 
     def on_screen_resume(self):
-        self.query_one(Tabs).active = self.query_one("#tab_cadastrar", Tab).id
+            perfis = Shelve.carregar("perfis.db", "perfis") or {}
+            if perfis:  
+                lista = list((chave, chave) for chave in perfis.keys())
+                lista.append(("Complex", "Complex"))
+                self.query_one("#select_perfil", Select).set_options(lista)
+                print(perfis)
+                self.perfis = perfis
+            else:
+
+                self.query_one("#select_perfil", Select).set_options([("Complex", "Complex")])
+            self.query_one(Tabs).active = self.query_one("#tab_cadastrar", Tab).id
+            
+    def atualizar(self):
+        self.query_one(SelectionList).clear_options()
+
+        self.montados = []
+        self.query_one(Grid).remove_children()
+
+        if self.perfil_atual == "Complex":
+                self.query_one(SelectionList).add_options((name, name)
+                                                          for name in Init.dict_objetos[self.tabela].__dict__.keys() if not name.startswith("_"))
+
+        else:
+                dicionario = self.perfis[self.perfil_atual]
+                self.query_one(SelectionList).add_options((name, name)
+                                                          for name in dicionario[self.tabela])
 
     def on_select_changed(self, evento: Select.Changed):
 
         if evento.select.id == "select_tabelas":
             self.tabela = evento.select.value.lower()
-            self.query_one(SelectionList).clear_options()
+            self.atualizar()
 
-            if not self.primeira_vez:
-                self.montados = []
-                self.query_one(Grid).remove_children()
-
-            self.query_one(SelectionList).add_options((name, name)
-                                                      for name in Init.dict_objetos[self.tabela].__dict__.keys() if not name.startswith("_"))
-
-            if evento.select.value == "Products":
-                if self.primeira_vez:
-                    self.montados = [
-                        "name", "regular_price", "description"]
-                    for valor in self.montados:
-                        self.query_one(SelectionList).select(valor)
-                    self.primeira_vez = False
+        elif evento.select.id == "select_perfil":
+            self.perfil_atual = evento.select.value
+            if self.perfil_atual == "Complex":
+                self.query_one("#select_tabelas", Select).set_options([("Products", "Products"), (
+                    "Orders", "Orders"), ("Customers", "Customers"), ("Coupons", "Coupons"), ("Taxes", "Taxes")])
+            else:
+                dicionario = self.perfis[self.perfil_atual]
+                self.query_one("#select_tabelas", Select).set_options(
+                    (tabela.capitalize(), tabela.capitalize()) for tabela in dicionario["tabelas"])
+            self.atualizar()
 
         else:
             match evento.select.value:
