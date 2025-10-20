@@ -4,7 +4,8 @@ wcapi = API(
     url="https://sualoja.com",
     consumer_key="ck_xxxxxxxxxxxxxxxxxxxxxx",
     consumer_secret="cs_xxxxxxxxxxxxxxxxxxxxxx",
-    version="wc/v3"
+    version="wc/v3",
+    verify_ssl=False
 )
 
 # def adicionar(tabela, item):
